@@ -1,8 +1,5 @@
 #!/bin/bash
 
-echo 'Building project'
-npm run build
-
 echo 'Prepearing to git upload'
 git add .
 
