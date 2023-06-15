@@ -1044,7 +1044,7 @@
         const window = ssr_window_esm_getWindow();
         const document = ssr_window_esm_getDocument();
         return {
-            smoothScroll: document.documentElement && "scrollBehavior" in document.documentElement.style,
+            smoothScroll: document.documentElement && document.documentElement.style && "scrollBehavior" in document.documentElement.style,
             touch: !!("ontouchstart" in window || window.DocumentTouch && document instanceof window.DocumentTouch)
         };
     }
@@ -1466,7 +1466,7 @@
             allSlidesSize -= spaceBetween;
             const maxSnap = allSlidesSize - swiperSize;
             snapGrid = snapGrid.map((snap => {
-                if (snap < 0) return -offsetBefore;
+                if (snap <= 0) return -offsetBefore;
                 if (snap > maxSnap) return maxSnap + offsetAfter;
                 return snap;
             }));
@@ -1673,11 +1673,22 @@
         amount = Math.min(amount, len);
         const slidesPerView = swiper.params.slidesPerView === "auto" ? swiper.slidesPerViewDynamic() : Math.ceil(swiper.params.slidesPerView);
         const activeIndex = swiper.activeIndex;
+        if (swiper.params.grid && swiper.params.grid.rows > 1) {
+            const activeColumn = activeIndex;
+            const preloadColumns = [ activeColumn - amount ];
+            preloadColumns.push(...Array.from({
+                length: amount
+            }).map(((_, i) => activeColumn + slidesPerView + i)));
+            swiper.slides.forEach(((slideEl, i) => {
+                if (preloadColumns.includes(slideEl.column)) unlazy(swiper, i);
+            }));
+            return;
+        }
         const slideIndexLastInView = activeIndex + slidesPerView - 1;
-        if (swiper.params.rewind) for (let i = activeIndex - amount; i <= slideIndexLastInView + amount; i += 1) {
+        if (swiper.params.rewind || swiper.params.loop) for (let i = activeIndex - amount; i <= slideIndexLastInView + amount; i += 1) {
             const realIndex = (i % len + len) % len;
-            if (realIndex !== activeIndex && realIndex > slideIndexLastInView) unlazy(swiper, realIndex);
-        } else for (let i = Math.max(slideIndexLastInView - amount, 0); i <= Math.min(slideIndexLastInView + amount, len - 1); i += 1) if (i !== activeIndex && i > slideIndexLastInView) unlazy(swiper, i);
+            if (realIndex < activeIndex || realIndex > slideIndexLastInView) unlazy(swiper, realIndex);
+        } else for (let i = Math.max(activeIndex - amount, 0); i <= Math.min(slideIndexLastInView + amount, len - 1); i += 1) if (i !== activeIndex && (i > slideIndexLastInView || i < activeIndex)) unlazy(swiper, i);
     };
     function getActiveIndexByTranslate(swiper) {
         const {slidesGrid, params} = swiper;
@@ -1934,7 +1945,7 @@
             } else if (normalizedTranslate >= normalizedGrid) slideIndex = i;
         }
         if (swiper.initialized && slideIndex !== activeIndex) {
-            if (!swiper.allowSlideNext && translate < swiper.translate && translate < swiper.minTranslate()) return false;
+            if (!swiper.allowSlideNext && (rtl ? translate > swiper.translate && translate > swiper.minTranslate() : translate < swiper.translate && translate < swiper.minTranslate())) return false;
             if (!swiper.allowSlidePrev && translate > swiper.translate && translate > swiper.maxTranslate()) if ((activeIndex || 0) !== slideIndex) return false;
         }
         if (slideIndex !== (previousIndex || 0) && runCallbacks) swiper.emit("beforeSlideChangeStart");
@@ -2350,7 +2361,7 @@
         if (document.activeElement && document.activeElement.matches(data.focusableElements) && document.activeElement !== targetEl) document.activeElement.blur();
         const shouldPreventDefault = preventDefault && swiper.allowTouchMove && params.touchStartPreventDefault;
         if ((params.touchStartForcePreventDefault || shouldPreventDefault) && !targetEl.isContentEditable) e.preventDefault();
-        if (swiper.params.freeMode && swiper.params.freeMode.enabled && swiper.freeMode && swiper.animating && !params.cssMode) swiper.freeMode.onTouchStart();
+        if (params.freeMode && params.freeMode.enabled && swiper.freeMode && swiper.animating && !params.cssMode) swiper.freeMode.onTouchStart();
         swiper.emit("touchStart", e);
     }
     function onTouchMove(event) {
@@ -2517,7 +2528,7 @@
             swiper.updateActiveIndex();
             swiper.updateSlidesClasses();
         }
-        if (swiper.params.freeMode && params.freeMode.enabled && swiper.freeMode) swiper.freeMode.onTouchMove();
+        if (params.freeMode && params.freeMode.enabled && swiper.freeMode) swiper.freeMode.onTouchMove();
         swiper.updateProgress(data.currentTranslate);
         swiper.setTranslate(data.currentTranslate);
     }
@@ -2568,7 +2579,7 @@
         let currentPos;
         if (params.followFinger) currentPos = rtl ? swiper.translate : -swiper.translate; else currentPos = -data.currentTranslate;
         if (params.cssMode) return;
-        if (swiper.params.freeMode && params.freeMode.enabled) {
+        if (params.freeMode && params.freeMode.enabled) {
             swiper.freeMode.onTouchEnd({
                 currentPos
             });
@@ -2590,7 +2601,7 @@
         }
         let rewindFirstIndex = null;
         let rewindLastIndex = null;
-        if (params.rewind) if (swiper.isBeginning) rewindLastIndex = swiper.params.virtual && swiper.params.virtual.enabled && swiper.virtual ? swiper.virtual.slides.length - 1 : swiper.slides.length - 1; else if (swiper.isEnd) rewindFirstIndex = 0;
+        if (params.rewind) if (swiper.isBeginning) rewindLastIndex = params.virtual && params.virtual.enabled && swiper.virtual ? swiper.virtual.slides.length - 1 : swiper.slides.length - 1; else if (swiper.isEnd) rewindFirstIndex = 0;
         const ratio = (currentPos - slidesGrid[stopIndex]) / groupSize;
         const increment = stopIndex < params.slidesPerGroupSkip - 1 ? 1 : params.slidesPerGroup;
         if (timeDiff > params.longSwipesMs) {
@@ -2665,6 +2676,7 @@
     function onLoad(e) {
         const swiper = this;
         processLazyPreloader(swiper, e.target);
+        if (swiper.params.cssMode || swiper.params.slidesPerView !== "auto" && !swiper.params.autoHeight) return;
         swiper.update();
     }
     let dummyEventAttached = false;
@@ -2747,6 +2759,7 @@
             swiper.emitContainerClasses();
         }
         [ "navigation", "pagination", "scrollbar" ].forEach((prop => {
+            if (typeof breakpointParams[prop] === "undefined") return;
             const wasModuleEnabled = params[prop] && params[prop].enabled;
             const isModuleEnabled = breakpointParams[prop] && breakpointParams[prop].enabled;
             if (wasModuleEnabled && !isModuleEnabled) swiper[prop].disable();
@@ -3172,7 +3185,7 @@
             const {params, slides, slidesGrid, slidesSizesGrid, size: swiperSize, activeIndex} = swiper;
             let spv = 1;
             if (params.centeredSlides) {
-                let slideSize = slides[activeIndex].swiperSlideSize;
+                let slideSize = slides[activeIndex] ? slides[activeIndex].swiperSlideSize : 0;
                 let breakLoop;
                 for (let i = activeIndex + 1; i < slides.length; i += 1) if (slides[i] && !breakLoop) {
                     slideSize += slides[i].swiperSlideSize;
@@ -3213,12 +3226,12 @@
                 swiper.updateSlidesClasses();
             }
             let translated;
-            if (swiper.params.freeMode && swiper.params.freeMode.enabled) {
+            if (params.freeMode && params.freeMode.enabled && !params.cssMode) {
                 setTranslate();
-                if (swiper.params.autoHeight) swiper.updateAutoHeight();
+                if (params.autoHeight) swiper.updateAutoHeight();
             } else {
-                if ((swiper.params.slidesPerView === "auto" || swiper.params.slidesPerView > 1) && swiper.isEnd && !swiper.params.centeredSlides) {
-                    const slides = swiper.virtual && swiper.params.virtual.enabled ? swiper.virtual.slides : swiper.slides;
+                if ((params.slidesPerView === "auto" || params.slidesPerView > 1) && swiper.isEnd && !params.centeredSlides) {
+                    const slides = swiper.virtual && params.virtual.enabled ? swiper.virtual.slides : swiper.slides;
                     translated = swiper.slideTo(slides.length - 1, 0, false, true);
                 } else translated = swiper.slideTo(swiper.activeIndex, 0, false, true);
                 if (!translated) setTranslate();
@@ -3659,7 +3672,7 @@
                 }));
                 if (el.length > 1) bullets.forEach((bullet => {
                     const bulletIndex = utils_elementIndex(bullet);
-                    if (bulletIndex === current) bullet.classList.add(...params.bulletActiveClass.split(" "));
+                    if (bulletIndex === current) bullet.classList.add(...params.bulletActiveClass.split(" ")); else if (swiper.isElement) bullet.setAttribute("part", "bullet");
                     if (params.dynamicBullets) {
                         if (bulletIndex >= firstIndex && bulletIndex <= lastIndex) bullet.classList.add(...`${params.bulletActiveClass}-main`.split(" "));
                         if (bulletIndex === firstIndex) setSideBullets(bullet, "prev");
@@ -3668,6 +3681,9 @@
                 })); else {
                     const bullet = bullets[current];
                     if (bullet) bullet.classList.add(...params.bulletActiveClass.split(" "));
+                    if (swiper.isElement) bullets.forEach(((bulletEl, bulletIndex) => {
+                        bulletEl.setAttribute("part", bulletIndex === current ? "bullet-active" : "bullet");
+                    }));
                     if (params.dynamicBullets) {
                         const firstDisplayedBullet = bullets[firstIndex];
                         const lastDisplayedBullet = bullets[lastIndex];
@@ -3726,7 +3742,7 @@
             if (params.type === "bullets") {
                 let numberOfBullets = swiper.params.loop ? Math.ceil(slidesLength / swiper.params.slidesPerGroup) : swiper.snapGrid.length;
                 if (swiper.params.freeMode && swiper.params.freeMode.enabled && numberOfBullets > slidesLength) numberOfBullets = slidesLength;
-                for (let i = 0; i < numberOfBullets; i += 1) if (params.renderBullet) paginationHTML += params.renderBullet.call(swiper, i, params.bulletClass); else paginationHTML += `<${params.bulletElement} class="${params.bulletClass}"></${params.bulletElement}>`;
+                for (let i = 0; i < numberOfBullets; i += 1) if (params.renderBullet) paginationHTML += params.renderBullet.call(swiper, i, params.bulletClass); else paginationHTML += `<${params.bulletElement} ${swiper.isElement ? 'part="bullet"' : ""} class="${params.bulletClass}"></${params.bulletElement}>`;
             }
             if (params.type === "fraction") if (params.renderFraction) paginationHTML = params.renderFraction.call(swiper, params.currentClass, params.totalClass); else paginationHTML = `<span class="${params.currentClass}"></span>` + " / " + `<span class="${params.totalClass}"></span>`;
             if (params.type === "progressbar") if (params.renderProgressbar) paginationHTML = params.renderProgressbar.call(swiper, params.progressbarFillClass); else paginationHTML = `<span class="${params.progressbarFillClass}"></span>`;
