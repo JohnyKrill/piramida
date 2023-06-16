@@ -2984,7 +2984,8 @@ body::after {
   }
 
   .block-menu__title {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
+    white-space: nowrap;
   }
 
   .block-contact__spollers {
