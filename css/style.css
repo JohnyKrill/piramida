@@ -2401,11 +2401,10 @@ body::after {
   }
 
   .no-webp .swiper-slide{
-    background: url(../img/hero-slider-img-1.png) 0 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat; }
+    background: url(../img/hero-slider-img-1.png) 0 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, -webkit-gradient(linear, left top, right top, from(rgb(255, 255, 255)), color-stop(50%, rgb(222, 222, 222))); }
 
-  .swiper-slide {
-    background-color: #f0f1f3;
-  }
+  .no-webp .swiper-slide{
+    background: url(../img/hero-slider-img-1.png) 0 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(222, 222, 222) 50%); }
 
   .slide-1 {
     -webkit-padding-before: 6.375rem;
@@ -3285,10 +3284,9 @@ body::after {
 
 @media (max-width: 29.875em) {
   .no-webp .swiper-slide{
-    background: url(../img/hero-slider-img-1.png) -290px 50%/cover no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat; }
-  .swiper-slide {
-    background-color: #f0f1f3;
-  }
+    background: url(../img/hero-slider-img-1.png) -290px 50%/cover no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, -webkit-gradient(linear, left top, right top, from(rgb(255, 255, 255)), color-stop(50%, rgb(222, 222, 222))); }
+  .no-webp .swiper-slide{
+    background: url(../img/hero-slider-img-1.png) -290px 50%/cover no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(222, 222, 222) 50%); }
 
   .slide-1 {
     padding-inline: 1.875rem;
@@ -3532,10 +3530,9 @@ body::after {
 
 @media (max-width: 62.5em) and (min-width: 29.875em) {
   .no-webp .swiper-slide{
-    background: url(../img/hero-slider-img-1.png) -90px 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat; }
-  .swiper-slide {
-    background-color: #f0f1f3;
-  }
+    background: url(../img/hero-slider-img-1.png) -90px 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, -webkit-gradient(linear, left top, right top, from(rgb(255, 255, 255)), color-stop(50%, rgb(222, 222, 222))); }
+  .no-webp .swiper-slide{
+    background: url(../img/hero-slider-img-1.png) -90px 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(222, 222, 222) 50%); }
 }
 
 @media (min-width: 36em) and (max-width: 47.99875em) {
@@ -3883,7 +3880,11 @@ body::after {
 .webp .sales-1-box{ background-image: linear-gradient(to left, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url(../img/sales-1-bg.webp); }
 
 @media (min-width: 47.99875em){
-  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) 0 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat; }
+  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) 0 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, -webkit-gradient(linear, left top, right top, from(rgb(255, 255, 255)), color-stop(50%, rgb(222, 222, 222))); }
+}
+
+@media (min-width: 47.99875em){
+  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) 0 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(222, 222, 222) 50%); }
 }
 
 @media (min-width: 61.99875em){
@@ -3895,9 +3896,17 @@ body::after {
 }
 
 @media (max-width: 29.875em){
-  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) -290px 50%/cover no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat; }
+  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) -290px 50%/cover no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, -webkit-gradient(linear, left top, right top, from(rgb(255, 255, 255)), color-stop(50%, rgb(222, 222, 222))); }
+}
+
+@media (max-width: 29.875em){
+  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) -290px 50%/cover no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(222, 222, 222) 50%); }
 }
 
 @media (max-width: 62.5em) and (min-width: 29.875em){
-  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) -90px 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat; }
+  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) -90px 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, -webkit-gradient(linear, left top, right top, from(rgb(255, 255, 255)), color-stop(50%, rgb(222, 222, 222))); }
+}
+
+@media (max-width: 62.5em) and (min-width: 29.875em){
+  .webp .swiper-slide{ background: url(../img/hero-slider-img-1.webp) -90px 0/contain no-repeat, url(../img/hero-slider-decor-shape-1.svg) 100% 100%/20% no-repeat, linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(222, 222, 222) 50%); }
 }
